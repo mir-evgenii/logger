@@ -1,4 +1,4 @@
-import paramiko, socket
+import socket, paramiko
 # from GUI import GUI
 # from Parser import Parser
 
@@ -6,6 +6,12 @@ import paramiko, socket
 class SSH:
 
     def __init__(self, host, user, password, port):
+
+        self.stdin = None
+        self.stdout = None
+        self.stderr = None
+        self.data = None
+
         try:
             self.client = paramiko.SSHClient()
             self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
