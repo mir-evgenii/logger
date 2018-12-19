@@ -1,26 +1,22 @@
 import tkinter
+import tkinter.messagebox
 from SSH import SSH
 
 
 class GUI:
 
     def __init__(self):
-
-        self.ent = None
-        self.but = None
-        self.tex = None
-
-        self.login_text = None
         self.login = None
-        self.password_text = None
         self.password = None
         self.host = None
+        self.find_text = None
+        self.ssh = None
+        self.result = None
+        self.win = None
 
         self.root = tkinter.Tk()
         self.root.title("Logger")
         self.auth()
-        # self.main_window()
-        # self.test()
         self.root.mainloop()
 
     def connect(self, event):
@@ -28,18 +24,17 @@ class GUI:
         password = self.password.get()
         host = self.host.get(self.host.curselection())
         port = 22
-        ssh = SSH(host, user, password, port)
-        if ssh.error != 0:
-            print(ssh.error)
+        self.ssh = SSH(host, user, password, port)
+        if self.ssh.error != 0:
+            tkinter.messagebox.showerror("Ошибка!", self.ssh.error)
         else:
-            grep = ssh.grep('t', 'log', '20181217')  # для проверки, временная строка !!!
-            print(grep)  # для проверки, временная строка !!!
+            self.main_window(host)
 
     def auth(self):
-        self.login_text = tkinter.Label(self.root, text="Введите логин", font="Arial 11")  # строка текста
+        login_text = tkinter.Label(self.root, text="Введите логин", font="Arial 11")  # строка текста
         self.login = tkinter.Entry(self.root, width=20, bd=3)
         self.login.insert(0, 'oper')  # значение поля по умолчанию
-        self.password_text = tkinter.Label(self.root, text="Введите пароль", font="Arial 11")  # строка текста
+        password_text = tkinter.Label(self.root, text="Введите пароль", font="Arial 11")  # строка текста
         self.password = tkinter.Entry(self.root, width=20, bd=3, show='*')
 
         btn = tkinter.Button(self.root, text="Войти")
@@ -51,52 +46,32 @@ class GUI:
         for i in r:
             self.host.insert(tkinter.END, i)
 
-        self.login_text.pack(padx=5, pady=5)
+        login_text.pack(padx=5, pady=5)
         self.login.pack()
-        self.password_text.pack(padx=5, pady=5)
+        password_text.pack(padx=5, pady=5)
         self.password.pack()
-        btn.pack(padx=10, pady=10)
         self.host.pack(padx=10, pady=10)
-
-    def main_window(self):
-        lab0 = tkinter.Label(self.root, text="Поиск", font="Arial 9")  # строка текста
-        ent0 = tkinter.Entry(self.root, width=20, bd=3)
-
-        btn = tkinter.Button(self.root, text="Найти")
-        btn.bind("<Button-1>", self.hi)
-
-        frm = tkinter.Frame(self.root, width=500, height=100, bg='grey')
-
-        # Не работает с pack и Frame
-        # frm = tkinter.Text(self.root, width=40, height=3, font='14')
-        # scr = tkinter.Scrollbar(self.root, command=frm.yview)
-        # frm.configure(yscrollcommand=scr.set)
-        # frm.grid(row=0, column=0)
-        # scr.grid(row=0, column=1)
-
-        lab0.pack(padx=5, pady=5)
-        ent0.pack()
         btn.pack(padx=10, pady=10)
-        frm.pack(padx=10, pady=10)
 
-    def test(self):
-        self.ent = tkinter.Entry(self.root, width=1)
-        self.but = tkinter.Button(self.root, text="Вывести")
-        self.tex = tkinter.Text(self.root, width=20, height=3, font="12", wrap=tkinter.WORD)
-        self.ent.grid(row=0, column=0, padx=20)
-        self.but.grid(row=0, column=1)
-        self.tex.grid(row=0, column=2, padx=20, pady=10)
-        self.but.bind("<Button-1>", self.output)
+    def main_window(self, title):
+        self.win = tkinter.Toplevel(self.root)
+        self.win.title(title)
+        self.win.minsize(width=400, height=200)
+        text = tkinter.Label(self.win, text="Искать", font="Arial 9")
+        self.find_text = tkinter.Entry(self.win, width=20, bd=3)
+        btn = tkinter.Button(self.win, text="Найти")
+        btn.bind("<Button-1>", self.grep)
+        self.win.bind("<Return>", self.grep)
+        self.result = tkinter.Label(self.win, text="Результат поиска", font="Arial 9")
 
-    def output(self, event):
-        s = self.ent.get()
+        text.pack(padx=5, pady=5)
+        self.find_text.pack(padx=5, pady=5)
+        btn.pack(padx=5, pady=5)
+        self.result.pack(padx=5, pady=5)
 
-        if s == "1":
-            self.tex.delete(1.0, tkinter.END)
-            self.tex.insert(tkinter.END, "Обслуживание клиентов на втором этаже")
-        elif s == "2":
-            self.tex.delete(1.0, tkinter.END)
-            self.tex.insert(tkinter.END, "Пластиковые карты выдают в соседнем здании")
-        else:
-            self.tex.delete(1.0, tkinter.END)
-            self.tex.insert(tkinter.END, "Введите 1 или 2 в поле слева")
+    def grep(self, event):
+        number = self.find_text.get()
+        result = self.ssh.grep(number, 'log', '20181217')
+        self.result.pack_forget()
+        self.result = tkinter.Label(self.win, text=result, font="Arial 9")
+        self.result.pack(padx=5, pady=5)
