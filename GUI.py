@@ -23,26 +23,28 @@ class GUI:
         # self.test()
         self.root.mainloop()
 
-    def hi(self, event):
-        # print('Yet another hello world')
+    def connect(self, event):
         user = self.login.get()
         password = self.password.get()
-        # host = self.host.get()
-        host = 'localhost'
+        host = self.host.get(self.host.curselection())
         port = 22
         ssh = SSH(host, user, password, port)
-        grep = ssh.grep('t', 'log', '20181217')
-        print(grep)
+        if ssh.error != 0:
+            print(ssh.error)
+        else:
+            grep = ssh.grep('t', 'log', '20181217')  # для проверки, временная строка !!!
+            print(grep)  # для проверки, временная строка !!!
 
     def auth(self):
         self.login_text = tkinter.Label(self.root, text="Введите логин", font="Arial 11")  # строка текста
         self.login = tkinter.Entry(self.root, width=20, bd=3)
+        self.login.insert(0, 'oper')  # значение поля по умолчанию
         self.password_text = tkinter.Label(self.root, text="Введите пароль", font="Arial 11")  # строка текста
-        self.password = tkinter.Entry(self.root, width=20, bd=3)
+        self.password = tkinter.Entry(self.root, width=20, bd=3, show='*')
 
         btn = tkinter.Button(self.root, text="Войти")
-        btn.bind("<Button-1>", self.hi)  # связь кнопки и функции
-        self.root.bind("<Return>", self.hi)
+        btn.bind("<Button-1>", self.connect)  # связь кнопки и функции
+        self.root.bind("<Return>", self.connect)
 
         r = ['logger-nsk', 'logger-bg', 'localhost']  # список
         self.host = tkinter.Listbox(self.root, selectmode=tkinter.SINGLE, height=4)

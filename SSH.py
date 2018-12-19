@@ -12,18 +12,18 @@ class SSH:
         self.stderr = None
         self.data = None
 
+        self.error = 0
+
         try:
             self.client = paramiko.SSHClient()
             self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             self.client.connect(hostname=host, username=user, password=password, port=port)
+        except socket.gaierror:
+            self.error = 'Не правильный хост!'
         except paramiko.ssh_exception.AuthenticationException:
-            self.error = 'Не правильный пароль!'
+            self.error = 'Не правильный пароль или имя пользователя!'
         except paramiko.ssh_exception.NoValidConnectionsError:
             self.error = 'Не правильный порт!'
-        except NameError:
-            self.error = 'Не правильное имя пользователя!'
-        except socket.gaierror:
-            self.error = 'Не правильный хост'
 
     def grep(self, number='', file='', time=''):
         self.stdin, self.stdout, self.stderr = self.client.exec_command(
