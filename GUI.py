@@ -20,6 +20,11 @@ class GUI:
         self.btn_del_ent = None
         self.btn_frame = None
         self.ent_frame = None
+        self.find_number_frame = None
+        self.find_date_frame = None
+        self.find_file_frame = None
+        self.file = None
+        self.files = None
 
         logger_conf = json.load(open("logger_conf.json"))
         self.auth_type = logger_conf["Auth_type"]
@@ -27,6 +32,7 @@ class GUI:
         self.port = logger_conf["Port"]
         self.key = logger_conf["SSH_keyFile"]
         self.hosts = logger_conf["Hosts"]
+        self.files = logger_conf["Files"]
 
         self.root = tkinter.Tk()
         self.root.title("Logger")
@@ -51,7 +57,6 @@ class GUI:
         btn.bind("<Button-1>", self.connect)  # связь кнопки и функции
         self.root.bind("<Return>", self.connect)
 
-        # r = ['logger-nsk', 'logger-bg', 'localhost']  # список
         self.host = tkinter.Listbox(self.root, selectmode=tkinter.SINGLE, height=4)
         for i in self.hosts:
             self.host.insert(tkinter.END, i)
@@ -66,12 +71,23 @@ class GUI:
         self.win = tkinter.Toplevel(self.root)
         self.ent_frame = tkinter.Frame(self.win)
         self.btn_frame = tkinter.Frame(self.win)
+        self.find_date_frame = tkinter.Frame(self.ent_frame)
+        self.find_number_frame = tkinter.Frame(self.ent_frame)
+        self.find_file_frame = tkinter.Frame(self.ent_frame)
         self.win.title(title)
         self.win.minsize(width=400, height=200)
         text = tkinter.Label(self.win, text="Искать", font="Arial 9")
-        self.find_number[0] = tkinter.Entry(self.ent_frame, width=20, bd=3)
+
+        find_file_text = tkinter.Label(self.find_file_frame, text="Файл", font="Arial 9")
+        self.file = tkinter.Listbox(self.find_file_frame, selectmode=tkinter.SINGLE, height=3)
+        for i in self.files:
+            self.file.insert(tkinter.END, i)
+
+        find_number_text = tkinter.Label(self.find_number_frame, text="Критерий поиска", font="Arial 9")
+        self.find_number[0] = tkinter.Entry(self.find_number_frame, width=20, bd=3)
         self.find_number[0].focus_set()
-        self.find_date = tkinter.Entry(self.ent_frame, width=20, bd=3)
+        find_date_text = tkinter.Label(self.find_date_frame, text="Дата", font="Arial 9")
+        self.find_date = tkinter.Entry(self.find_date_frame, width=20, bd=3)
         btn = tkinter.Button(self.btn_frame, text="Найти")
         btn.bind("<Button-1>", self.grep)
         self.win.bind("<Return>", self.grep)
@@ -80,6 +96,13 @@ class GUI:
         btn_add_ent.bind("<Button-1>", self.add_ent)
 
         text.pack(padx=5, pady=5)
+        self.find_file_frame.pack(side=tkinter.LEFT)
+        find_file_text.pack()
+        self.file.pack()
+        self.find_date_frame.pack(side=tkinter.LEFT)
+        find_date_text.pack()
+        self.find_number_frame.pack(side=tkinter.LEFT)
+        find_number_text.pack()
         self.find_date.pack(side=tkinter.LEFT, padx=5, pady=5)
         self.find_number[0].pack(side=tkinter.LEFT, padx=5, pady=5)
         self.ent_frame.pack()
@@ -103,13 +126,14 @@ class GUI:
             number = []
             for i in self.find_number:
                 number.append(i.get())
-        result = self.ssh.grep(number, 'log', date)
+        file = self.file.get(self.file.curselection())
+        result = self.ssh.grep(number, file, date)
         self.result.pack_forget()
         self.result = tkinter.Label(self.win, text=result, font="Arial 9")
         self.result.pack(padx=5, pady=5)
 
     def add_ent(self, event):
-        self.find_number.append(tkinter.Entry(self.ent_frame, width=20, bd=3))
+        self.find_number.append(tkinter.Entry(self.find_number_frame, width=20, bd=3))
         self.find_text_add.append(self.find_number[-1])
         for i in self.find_text_add:
             i.pack(side=tkinter.LEFT, padx=5, pady=5)

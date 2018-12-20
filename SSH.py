@@ -1,4 +1,4 @@
-import socket, paramiko
+import socket, paramiko, datetime
 # from GUI import GUI
 # from Parser import Parser
 
@@ -32,10 +32,23 @@ class SSH:
         except paramiko.ssh_exception.SSHException:
             self.error = 'Не верный тип авторизации!'
 
-    def grep(self, number='', file='', time=''):
+    def grep(self, number='', file='', date=''):
         if len(number) == 1:
-            self.stdin, self.stdout, self.stderr = self.client.exec_command(
-                "grep '{0}' logs/{1}.{2}".format(number, file, time))
+            if date == '':
+                query = "grep '{0}' logs/{1}".format(number, file)
+            else:
+                if date == datetime.datetime.today().strftime("%Y%m%d"):
+                    query = "grep '{0}' logs/{1}".format(number, file)
+                else:
+                    date = datetime.datetime.strptime(date, "%Y%m%d")
+                    one_day = datetime.timedelta(1)
+                    date = date + one_day
+                    date = date.strftime("%Y%m%d")
+                    if date == datetime.datetime.today().strftime("%Y%m%d"):
+                        query = "grep '{0}' logs/{1}-{2}".format(number, file, date)
+                    else:
+                        query = "xzgrep '{0}' logs/{1}-{2}.xz".format(number, file, date)
+            self.stdin, self.stdout, self.stderr = self.client.exec_command(query)
         elif len(number) > 1:
             for i in number:
                 print(i)
