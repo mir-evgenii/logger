@@ -26,7 +26,14 @@ class SSH:
             self.error = 'Не правильный порт!'
 
     def grep(self, number='', file='', time=''):
-        self.stdin, self.stdout, self.stderr = self.client.exec_command(
-            "grep '{0}' logs/{1}.{2}".format(number, file, time))
+        if len(number) == 1:
+            self.stdin, self.stdout, self.stderr = self.client.exec_command(
+                "grep '{0}' logs/{1}.{2}".format(number, file, time))
+        elif len(number) > 1:
+            for i in number:
+                print(i)
+            return "it work!"
+        else:
+            return 0
         self.data = self.stdout.read() + self.stderr.read()
         return self.data

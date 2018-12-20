@@ -1,5 +1,7 @@
 import tkinter
 import tkinter.messagebox
+from typing import List
+
 from SSH import SSH
 
 
@@ -94,14 +96,20 @@ class GUI:
             else:
                 tkinter.messagebox.showerror("Ошибка!", "В первое поле нужно ввести дату в формате: ГГГГММДД")
 
-        number = self.find_number[0].get()
+        if len(self.find_number) == 1:
+            number = self.find_number[0].get()
+        else:
+            number = []
+            for i in self.find_number:
+                number.append(i.get())
         result = self.ssh.grep(number, 'log', date)
         self.result.pack_forget()
         self.result = tkinter.Label(self.win, text=result, font="Arial 9")
         self.result.pack(padx=5, pady=5)
 
     def add_ent(self, event):
-        self.find_text_add.append(tkinter.Entry(self.ent_frame, width=20, bd=3))
+        self.find_number.append(tkinter.Entry(self.ent_frame, width=20, bd=3))
+        self.find_text_add.append(self.find_number[-1])
         for i in self.find_text_add:
             i.pack(side=tkinter.LEFT, padx=5, pady=5)
         if len(self.find_text_add) == 1:
