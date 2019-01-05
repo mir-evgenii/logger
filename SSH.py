@@ -5,7 +5,7 @@ import socket, paramiko
 
 class SSH:
 
-    def __init__(self, host, user, password, port):
+    def __init__(self, host, login, password, port, auth_type, key):
 
         self.stdin = None
         self.stdout = None
@@ -17,13 +17,20 @@ class SSH:
         try:
             self.client = paramiko.SSHClient()
             self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            self.client.connect(hostname=host, username=user, password=password, port=port)
+            if auth_type == 'password':
+                self.client.connect(hostname=host, username=login, password=password, port=port)
+            elif auth_type == 'key':
+                self.client.connect(hostname=host, username=login, port=port, key_filename=key)
+            else:
+                self.error = 'Не верное значение типа авторизации!'
         except socket.gaierror:
             self.error = 'Не правильный хост!'
         except paramiko.ssh_exception.AuthenticationException:
             self.error = 'Не правильный пароль или имя пользователя!'
         except paramiko.ssh_exception.NoValidConnectionsError:
             self.error = 'Не правильный порт!'
+        except paramiko.ssh_exception.SSHException:
+            self.error = 'Не верный тип авторизации!'
 
     def grep(self, number='', file='', time=''):
         if len(number) == 1:

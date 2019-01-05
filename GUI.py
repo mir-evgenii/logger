@@ -1,6 +1,7 @@
 import tkinter
 import tkinter.messagebox
 from typing import List
+import json
 
 from SSH import SSH
 
@@ -8,7 +9,6 @@ from SSH import SSH
 class GUI:
 
     def __init__(self):
-        self.login = None
         self.password = None
         self.host = None
         self.find_number = [None, ]
@@ -21,26 +21,28 @@ class GUI:
         self.btn_frame = None
         self.ent_frame = None
 
+        logger_conf = json.load(open("logger_conf.json"))
+        self.auth_type = logger_conf["Auth_type"]
+        self.login = logger_conf["Login"]
+        self.port = logger_conf["Port"]
+        self.key = logger_conf["SSH_keyFile"]
+        self.hosts = logger_conf["Hosts"]
+
         self.root = tkinter.Tk()
         self.root.title("Logger")
         self.auth()
         self.root.mainloop()
 
     def connect(self, event):
-        user = self.login.get()
         password = self.password.get()
         host = self.host.get(self.host.curselection())
-        port = 22
-        self.ssh = SSH(host, user, password, port)
+        self.ssh = SSH(host, self.login, password, self.port, self.auth_type, self.key)
         if self.ssh.error != 0:
             tkinter.messagebox.showerror("Ошибка!", self.ssh.error)
         else:
             self.main_window(host)
 
     def auth(self):
-        login_text = tkinter.Label(self.root, text="Введите логин", font="Arial 11")  # строка текста
-        self.login = tkinter.Entry(self.root, width=20, bd=3)
-        self.login.insert(0, 'oper')  # значение поля по умолчанию
         password_text = tkinter.Label(self.root, text="Введите пароль", font="Arial 11")  # строка текста
         self.password = tkinter.Entry(self.root, width=20, bd=3, show='*')
         self.password.focus_set()
@@ -49,15 +51,14 @@ class GUI:
         btn.bind("<Button-1>", self.connect)  # связь кнопки и функции
         self.root.bind("<Return>", self.connect)
 
-        r = ['logger-nsk', 'logger-bg', 'localhost']  # список
+        # r = ['logger-nsk', 'logger-bg', 'localhost']  # список
         self.host = tkinter.Listbox(self.root, selectmode=tkinter.SINGLE, height=4)
-        for i in r:
+        for i in self.hosts:
             self.host.insert(tkinter.END, i)
 
-        login_text.pack(padx=5, pady=5)
-        self.login.pack()
-        password_text.pack(padx=5, pady=5)
-        self.password.pack()
+        if self.auth_type == 'password':
+            password_text.pack(padx=5, pady=5)
+            self.password.pack()
         self.host.pack(padx=10, pady=10)
         btn.pack(padx=10, pady=10)
 
