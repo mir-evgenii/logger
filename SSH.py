@@ -34,26 +34,30 @@ class SSH:
 
     def grep(self, number='', file='', date=''):
         if len(number) == 1:
-            if date == '':
-                query = "grep '{0}' logs/{1}".format(number, file)
-            else:
-                if date == datetime.datetime.today().strftime("%Y%m%d"):
-                    query = "grep '{0}' logs/{1}".format(number, file)
-                else:
-                    date = datetime.datetime.strptime(date, "%Y%m%d")
-                    one_day = datetime.timedelta(1)
-                    date = date + one_day
-                    date = date.strftime("%Y%m%d")
-                    if date == datetime.datetime.today().strftime("%Y%m%d"):
-                        query = "grep '{0}' logs/{1}-{2}".format(number, file, date)
-                    else:
-                        query = "xzgrep '{0}' logs/{1}-{2}.xz".format(number, file, date)
-            self.stdin, self.stdout, self.stderr = self.client.exec_command(query)
+            query = self.query(number, file, date)
         elif len(number) > 1:
-            for i in number:
-                print(i)
-            return "it work!"
+            query = self.query(number[0], file, date)
+            for i in number[1:]:
+                query = query + " | grep '{0}'".format(i)
         else:
-            return 0
+            return 0  # должен вернуть ошибку?
+        self.stdin, self.stdout, self.stderr = self.client.exec_command(query)
         self.data = self.stdout.read() + self.stderr.read()
         return self.data
+
+    def query(self, number='', file='', date=''):
+        if date == '':
+            query = "grep '{0}' logs/{1}".format(number, file)
+        else:
+            if date == datetime.datetime.today().strftime("%Y%m%d"):
+                query = "grep '{0}' logs/{1}".format(number, file)
+            else:
+                date = datetime.datetime.strptime(date, "%Y%m%d")
+                one_day = datetime.timedelta(1)
+                date = date + one_day
+                date = date.strftime("%Y%m%d")
+                if date == datetime.datetime.today().strftime("%Y%m%d"):
+                    query = "grep '{0}' logs/{1}-{2}".format(number, file, date)
+                else:
+                    query = "xzgrep '{0}' logs/{1}-{2}.xz".format(number, file, date)
+        return query
