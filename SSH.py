@@ -1,6 +1,6 @@
 import socket, paramiko, datetime
 # from GUI import GUI
-# from Parser import Parser
+from Parser import Parser
 
 
 class SSH:
@@ -32,9 +32,9 @@ class SSH:
         except paramiko.ssh_exception.SSHException:
             self.error = 'Не верный тип авторизации!'
 
-    def grep(self, number='', file='', date=''):
+    def grep(self, number='', file='', date='', path=''):
         if len(number) == 1:
-            query = self.query(number, file, date)
+            query = self.query(number, file, date, path)
         elif len(number) > 1:
             query = self.query(number[0], file, date)
             for i in number[1:]:
@@ -43,21 +43,23 @@ class SSH:
             return 0  # должен вернуть ошибку?
         self.stdin, self.stdout, self.stderr = self.client.exec_command(query)
         self.data = self.stdout.read() + self.stderr.read()
+        parser = Parser()
+        self.data = parser.parser(self.data.decode("utf-8"))
         return self.data
 
-    def query(self, number='', file='', date=''):
+    def query(self, number='', file='', date='', path=''):
         if date == '':
-            query = "grep '{0}' logs/{1}".format(number, file)
+            query = "grep '{0}' {1}/{2}".format(number, path, file)
         else:
             if date == datetime.datetime.today().strftime("%Y%m%d"):
-                query = "grep '{0}' logs/{1}".format(number, file)
+                query = "grep '{0}' {1}/{2}".format(number, path, file)
             else:
                 date = datetime.datetime.strptime(date, "%Y%m%d")
                 one_day = datetime.timedelta(1)
                 date = date + one_day
                 date = date.strftime("%Y%m%d")
                 if date == datetime.datetime.today().strftime("%Y%m%d"):
-                    query = "grep '{0}' logs/{1}-{2}".format(number, file, date)
+                    query = "grep '{0}' {1}/{2}-{3}".format(number, path, file, date)
                 else:
-                    query = "xzgrep '{0}' logs/{1}-{2}.xz".format(number, file, date)
+                    query = "xzgrep -a '{0}' {1}/{2}-{3}.xz".format(number, path, file, date)
         return query

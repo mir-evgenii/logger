@@ -33,6 +33,7 @@ class GUI:
         self.key = logger_conf["SSH_keyFile"]
         self.hosts = logger_conf["Hosts"]
         self.files = logger_conf["Files"]
+        self.files_path = logger_conf["Files_path"]
 
         self.root = tkinter.Tk()
         self.root.title("Logger")
@@ -127,7 +128,7 @@ class GUI:
             for i in self.find_number:
                 number.append(i.get())
         file = self.file.get(self.file.curselection())
-        result = self.ssh.grep(number, file, date)
+        result = self.ssh.grep(number, file, date, self.files_path)
         self.result.pack_forget()
         self.result = tkinter.Label(self.win, text=result, font="Arial 9")
         self.result.pack(padx=5, pady=5)
