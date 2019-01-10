@@ -33,9 +33,9 @@ class SSH:
             self.error = 'Не верный тип авторизации!'
 
     def grep(self, number='', file='', date='', path=''):
-        if len(number) == 1:
+        if isinstance(number, str):
             query = self.query(number, file, date, path)
-        elif len(number) > 1:
+        elif isinstance(number, list):
             query = self.query(number[0], file, date)
             for i in number[1:]:
                 query = query + " | grep '{0}'".format(i)

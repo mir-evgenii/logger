@@ -115,11 +115,10 @@ class GUI:
     def grep(self, event):
         date = self.find_date.get()
 
-        for i in date:
-            if i in "1234567890":
-                pass
-            else:
-                tkinter.messagebox.showerror("Ошибка!", "В первое поле нужно ввести дату в формате: ГГГГММДД")
+        if date == '':
+            pass
+        elif not(date.isdigit()):
+            tkinter.messagebox.showerror("Ошибка!", "В поле дата нужно ввести дату в формате: ГГГГММДД")
 
         if len(self.find_number) == 1:
             number = self.find_number[0].get()
@@ -146,5 +145,6 @@ class GUI:
     def del_ent(self, event):
         self.find_text_add[-1].pack_forget()
         del(self.find_text_add[-1])
+        del(self.find_number[-1])
         if len(self.find_text_add) < 1:
             self.btn_del_ent.pack_forget()

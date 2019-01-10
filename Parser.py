@@ -1,5 +1,5 @@
 # from SSH import SSH
-import json
+import json, re
 
 class Parser:
 
@@ -14,10 +14,18 @@ class Parser:
 
     def parser(self, str=''):
         # str = 'Number: NUMBER = 1234'
+
+        self.str_parser = self.date_parser(str)
+
         self.str = str.split()
         i_num = 0
         for i in self.str:
             i_num += 1
+
+            # добавить множество из месяцев !!!!!!!!!!
+            if i == 'Dec':
+                self.str_parser = self.str_parser + '__________\n'
+
             i = i.upper()
             for f in self.find_fields:
                 f = f.upper()
@@ -50,4 +58,19 @@ class Parser:
                 else:
                     continue
 
+        return self.str_parser
+
+    def date_parser(self, str=''):
+        self.str = str.split()
+        i_num = 0
+        for i in self.str:
+            i_num += 1
+            remch = re.match(r'\d\d', i)
+            if i == 'Dec':
+                self.str_parser = self.str_parser + 'Dec '
+            elif remch.group().isdigit() and len(remch.group()) == 2:
+                self.str_parser = self.str_parser + i + '\n'
+                break
+            else:
+                continue
         return self.str_parser
