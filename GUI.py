@@ -99,7 +99,7 @@ class GUI:
         text.pack(padx=5, pady=5)
         self.find_file_frame.pack(side=tkinter.LEFT)
         find_file_text.pack()
-        self.file.pack()
+        self.file.pack(side=tkinter.LEFT, padx=5, pady=5)
         self.find_date_frame.pack(side=tkinter.LEFT)
         find_date_text.pack()
         self.find_number_frame.pack(side=tkinter.LEFT)

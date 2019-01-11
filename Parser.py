@@ -22,7 +22,19 @@ class Parser:
         for i in self.str:
             i_num += 1
 
-            # добавить множество из месяцев !!!!!!!!!!
+            time = self.time_parser(i)
+            if time != 0:
+                self.str_parser = self.str_parser + 'TIME - ' + time + '\n'
+
+            gateway = self.gateway_parser(i)
+            if gateway != 0:
+                self.str_parser = self.str_parser + 'GATEWAY - ' + gateway + '\n'
+
+            action = self.action_parser(i)
+            if action != 0:
+                self.str_parser = self.str_parser + 'ACTION - ' + action + '\n'
+
+                # добавить множество из месяцев !!!!!!!!!!
             if i == 'Dec':
                 self.str_parser = self.str_parser + '__________\n'
 
@@ -74,3 +86,27 @@ class Parser:
             else:
                 continue
         return self.str_parser
+
+    def time_parser(self, str=''):
+        remch = re.match(r'\d\d:\d\d:\d\d', str)
+        if isinstance(remch, object) and not(remch is None):
+            return remch.group()
+        else:
+            return 0
+
+    def gateway_parser(self, str=''):
+        remch = re.match(r'...#\d{3,4}#', str)
+        if isinstance(remch, object) and not (remch is None):
+            return remch.group()[4:-1]
+        else:
+            return 0
+
+    def action_parser(self, str=''):
+        for a in ['CHECK', 'PAY']:
+            str = str.upper()
+            s_n = str.find(a)
+            if not(s_n == -1):
+                return str[s_n:-1]
+            else:
+                continue
+        return 0
