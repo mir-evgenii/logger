@@ -23,6 +23,8 @@ class GUI:
         self.find_number_frame = None
         self.find_date_frame = None
         self.find_file_frame = None
+        self.data_frame = None
+        self.scr = None
         self.file = None
         self.files = None
 
@@ -34,6 +36,8 @@ class GUI:
         self.hosts = logger_conf["Hosts"]
         self.files = logger_conf["Files"]
         self.files_path = logger_conf["Files_path"]
+        self.window_width = int(logger_conf["Window_width"])
+        self.window_height = int(logger_conf["Window_height"])
 
         self.root = tkinter.Tk()
         self.root.title("Logger")
@@ -76,7 +80,7 @@ class GUI:
         self.find_number_frame = tkinter.Frame(self.ent_frame)
         self.find_file_frame = tkinter.Frame(self.ent_frame)
         self.win.title(title)
-        self.win.minsize(width=400, height=200)
+        self.win.minsize(width=self.window_width, height=self.window_height)
         text = tkinter.Label(self.win, text="Искать", font="Arial 9")
 
         find_file_text = tkinter.Label(self.find_file_frame, text="Файл", font="Arial 9")
@@ -92,7 +96,12 @@ class GUI:
         btn = tkinter.Button(self.btn_frame, text="Найти")
         btn.bind("<Button-1>", self.grep)
         self.win.bind("<Return>", self.grep)
-        self.result = tkinter.Label(self.win, text="Результат поиска", font="Arial 9")
+
+        self.data_frame = tkinter.Frame(self.win)
+        self.result = tkinter.Text(self.data_frame, width=115, height=27, font="Arial 9")
+        self.result.insert(1.0, '')
+        self.scr = tkinter.Scrollbar(self.data_frame, command=self.result.yview)
+        self.result.configure(yscrollcommand=self.scr.set)
         btn_add_ent = tkinter.Button(self.btn_frame, text="Добавить критерий поиска")
         btn_add_ent.bind("<Button-1>", self.add_ent)
 
@@ -110,7 +119,10 @@ class GUI:
         self.btn_frame.pack()
         btn.pack(side=tkinter.LEFT, padx=5, pady=5)
         btn_add_ent.pack(side=tkinter.LEFT, padx=5, pady=5)
-        self.result.pack(padx=5, pady=5)
+        self.data_frame.pack()
+        # self.result.pack(padx=5, pady=5)
+        self.result.grid(row=0, column=0)
+        self.scr.grid(row=0, column=1)
 
     def grep(self, event):
         date = self.find_date.get()
@@ -129,8 +141,10 @@ class GUI:
         file = self.file.get(self.file.curselection())
         result = self.ssh.grep(number, file, date, self.files_path)
         self.result.pack_forget()
-        self.result = tkinter.Label(self.win, text=result, font="Arial 9")
-        self.result.pack(padx=5, pady=5)
+        # self.result = tkinter.Label(self.win, text=result, font="Arial 9")
+        self.result.insert(tkinter.CURRENT, result)
+        self.result.grid(row=0, column=0)
+        self.scr.grid(row=0, column=1)
 
     def add_ent(self, event):
         self.find_number.append(tkinter.Entry(self.find_number_frame, width=20, bd=3))
